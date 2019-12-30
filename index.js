@@ -10,18 +10,32 @@ const server = http.createServer((req, res) =>{
     const pathName = url.parse(req.url, true).pathname;
     const id = url.parse(req.url, true).query.id;
     
+    //product overview
     if(pathName === '/product' || pathName === '/'){
 
         res.writeHead(200, { 'Content-type' : 'text/html'});
-        res.end('this is product page');
+
+        fs.readFile(`${__dirname}/template/template-overview.html`,'utf-8',(err,data) =>{
+
+            res.end(data);
+        });
+        
     }
 
+    // laptop detail
     else if(pathName === '/laptop' && id < laptopData.length){
 
         res.writeHead(200, { 'Content-type' : 'text/html'});
-        res.end(`this is laptop page for laptop ${id} `);
+        fs.readFile(`${__dirname}/template/template-laptop.html`,'utf-8',(err,data) =>{
+
+            const laptop = laptopData[id];
+            
+            const output = replaceTemplate(data, laptop);
+            res.end(output);
+        });
     }
 
+    // url not found;
     else{
 
         res.writeHead(404, { 'Content-type' : 'text/html'});
@@ -37,3 +51,17 @@ server.listen(1337, 'localhost', () =>{
     console.log('Listening for request now');
 })
 
+function replaceTemplate(originalHTML, laptop){
+
+    let output = originalHTML.replace(/{%PRODUCTNAME%}/g,laptop.productName);
+    output = output.replace(/{%IMAGE%}/g,laptop.image);
+    output = output.replace(/{%PRICE%}/g,laptop.price);
+    output = output.replace(/{%SCREEN%}/g,laptop.screen);
+    output = output.replace(/{%CPU%}/g,laptop.cpu);
+    output = output.replace(/{%STORAGE%}/g,laptop.storage);
+    output = output.replace(/{%RAM%}/g,laptop.ram);
+    output = output.replace(/{%DESCRIPTION%}/g,laptop.description);
+    output = output.replace(/{%ID%}/g,laptop.id);
+
+    return output;
+}
